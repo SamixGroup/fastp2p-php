@@ -11,6 +11,8 @@ class ERRORS
     const PROCEDURAL_CENTER_NOT_AVAILABLE = -31624;
     const PAYMENT_IS_OUT_OF_DATE = -31640;
     const NETWORK_ERROR = -50001;
+    const JSON_PARSE_ERROR = -32700;
+    const INVALID_PARAMS = -32602;
 
     const MESSAGE = [
         self::THIS_CARD_IS_NOT_SERVICED => "Ushbu karta raqami bilan amaliyot qilib bo'lmaydi",
@@ -21,6 +23,8 @@ class ERRORS
         self::PROCEDURAL_CENTER_NOT_AVAILABLE => "Protsessing markazi mavjud emas.",
         self::PAYMENT_IS_OUT_OF_DATE => "O'tkazma muddati eskirgan, qayta urinib ko'ring.",
         self::NETWORK_ERROR => "So'rov yuborishdagi xatolik.",
+        self::JSON_PARSE_ERROR=>'JSON\'ni tahlil qilishda xatolik',
+        self::INVALID_PARAMS=>"Noto'g'ri ma'lumotlar kiritilgan"
     ];
 }
 
@@ -62,9 +66,9 @@ class FastP2P
         if (curl_error($ch)) {
             var_dump(curl_error($ch));
         } else {
-            return json_decode($res);
+            return json_decode($res,true);
         }
-        return json_decode($res);
+        return json_decode($res,true);
     }
 
     function _make_request($method_url, $params)
@@ -79,7 +83,7 @@ class FastP2P
                 $request_url,
                 $json
             );
-            if ($response and isset($response['error'])) throw new FastP2PError($response['error']['code']);
+            if ($response and isset($response['error'])) throw new FastP2PERROR($response['error']['code'],ERRORS::MESSAGE[$response['error']['code']]?:$response['error']);
             else return $response['result'];
 
         } catch (Exception $e) {
